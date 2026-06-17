@@ -68,7 +68,7 @@ body {
 .opt-group label.danger-opt { color:#8b0000; }
 .opt-group label.danger-opt:hover { background:#fff0f0; }
 
-/* 依賴人口 */
+/* 依賴人口與備註列 */
 .dep-row {
   display:flex; align-items:center; gap:8px;
   padding:4px 8px; margin-left:10px; font-size:13px; color:#444;
@@ -76,6 +76,10 @@ body {
 .dep-row input[type="number"] {
   width:56px; padding:3px 7px; border:1px solid #b0bedd;
   border-radius:4px; font-size:14px; font-family:inherit; text-align:center;
+}
+.dep-row input[type="text"] {
+  width:320px; padding:5px 10px; border:1px solid #b0bedd;
+  border-radius:5px; font-size:13px; font-family:inherit;
 }
 .dep-row input:focus { outline:none; border-color:#1a56db; }
 
@@ -163,7 +167,7 @@ body {
 .result-main  { font-size:11pt; font-weight:bold; line-height:1.5; }
 .result-main .highlight { font-size:13pt; }
 .result-note  { font-size:8.5pt; color:#334; margin-top:1px; }
-.result-minus { font-size:9pt; color:#5a2000; margin-top:2px; font-weight:bold; }
+.result-minus { font-size:9.5pt; color:#5a2000; margin-top:3px; font-weight:bold; background:#fffcf0; padding:2px 6px; border-radius:3px; border: 1px dashed #c97a00; }
 
 /* 填表說明 */
 .footnote { font-size:7.5pt; line-height:1.35; color:#111; margin-bottom:4px;
@@ -175,9 +179,13 @@ body {
 .sign-table td { border:none; font-weight:bold; font-size:10.5pt; width:25%; padding:0; }
 .sign-table .sign-line { height:26px; vertical-align:bottom; font-size:9.5pt; }
 
-/* ===== 列印 ===== */
+/* ===== 列印邊界最佳化 ===== */
 @media print {
-  body { background:#fff !important; margin:0; padding:0; }
+  @page { size: A4 landscape; margin: 0; }
+  body {
+    background:#fff !important; margin:0;
+    padding: 1.2cm 1.5cm; /* 保持精準內縮，防網址出現 */
+  }
   .control-panel { display:none !important; }
   .a4-wrap { width:100% !important; box-shadow:none !important; margin:0 !important; }
   .a4-page {
@@ -190,12 +198,12 @@ body {
   }
   .a4-page table { font-size:9.5pt !important; }
   .doc-title { font-size:14pt !important; }
-  @page { size:A4 landscape; margin:7mm 10mm; }
 }
 </style>
 </head>
 <body>
 
+<!-- ===== 操作面板 ===== -->
 <div class="control-panel">
   <div class="panel-header">
     <span style="font-size:22px;">📋</span>
@@ -204,6 +212,7 @@ body {
   </div>
   <div class="panel-body">
 
+    <!-- 基本資料 -->
     <div class="basic-info-row">
       <div class="field-group"><label>案主姓名</label><input type="text" id="in-name" oninput="updateForm()" placeholder="請輸入姓名"></div>
       <div class="field-group"><label>身分證字號</label><input type="text" id="in-id" oninput="updateForm()" placeholder="A123456789"></div>
@@ -214,6 +223,7 @@ body {
       </div>
     </div>
 
+    <!-- 排他審查 -->
     <div class="sec-title danger"><span class="sec-num">✕</span>資格排他審查 — 有勾選任一項，系統將強制判定「不符補助」並核定 0 元</div>
     <div class="opt-group">
       <label class="danger-opt"><input type="checkbox" id="in-reject-1" onchange="updateForm()"> 1. 家戶內存款本金分配全家人口，超過當年度低收入戶存款本金 2.5 倍。</label>
@@ -222,6 +232,7 @@ body {
       <label class="danger-opt"><input type="checkbox" id="in-reject-4" onchange="updateForm()"> 4. 案主已領有縣、鄉急難救助或急難紓困（馬上關懷），已足以負擔醫療或喪葬急難事由。</label>
     </div>
 
+    <!-- 1 主要家計 -->
     <div class="sec-title primary"><span class="sec-num">1</span>主要家計責任者評估（單選）</div>
     <div class="opt-group">
       <label><input type="radio" name="家計" value="main" onchange="updateForm()"> 主要負擔家計者 <strong style="color:#1a56db;">＋ 3 點</strong></label>
@@ -229,6 +240,7 @@ body {
       <label><input type="radio" name="家計" value="none" onchange="updateForm()" checked> 無此項判定</label>
     </div>
 
+    <!-- 2 所得 -->
     <div class="sec-title primary"><span class="sec-num">2</span>所得收入與危機狀態評估（單選）</div>
     <div class="opt-group">
       <label><input type="radio" name="所得" value="1"      onchange="updateForm()"> 1 倍以下（非列冊低收入戶）<strong style="color:#1a56db;">＋ 2 點</strong></label>
@@ -239,6 +251,7 @@ body {
       <label><input type="radio" name="所得" value="none"   onchange="updateForm()" checked> 無此項判定</label>
     </div>
 
+    <!-- 3 急難原因 -->
     <div class="sec-title primary"><span class="sec-num">3</span>急難原因選項與加點（複選）</div>
 
     <span class="sub-label">A．戶內人口死亡無力殮葬</span>
@@ -274,14 +287,22 @@ body {
       <label><input type="checkbox" id="cause-wrk5" onchange="updateForm()"> 失業者年邁（60～65歲）或身障、未領津貼且無家屬支援 <strong style="color:#1a56db;">＋ 2 點</strong></label>
     </div>
 
-    <div class="sec-title warning"><span class="sec-num">4</span>資源重複扣減評估（單選）</div>
+    <!-- 4 扣減 -->
+    <div class="sec-title warning"><span class="sec-num">4</span>資源重複扣減評估（單選 ＆ 補助內容備註）</div>
     <div class="opt-group">
       <label><input type="radio" name="扣減" value="0" checked onchange="updateForm()"> 不予扣減（0 點）</label>
       <label><input type="radio" name="扣減" value="1" onchange="updateForm()"> 已領取其他資源，酌予扣減 <strong style="color:#b01c2e;">1 點</strong></label>
       <label><input type="radio" name="扣減" value="2" onchange="updateForm()"> 已領取其他資源，酌予扣減 <strong style="color:#b01c2e;">2 點</strong></label>
       <label><input type="radio" name="扣減" value="3" onchange="updateForm()"> 已領取其他資源，酌予扣減 <strong style="color:#b01c2e;">3 點</strong></label>
+      
+      <!-- 🌟 新增：自訂已獲補助內容的文字框 -->
+      <div class="dep-row" id="minus-detail-row" style="margin-top:6px;">
+        <span>📝 <b>自訂重複領取的資源／補助名稱：</b></span>
+        <input type="text" id="in-minus-detail" oninput="updateForm()" placeholder="例：南投縣急難救助金、張榮發基金會補助">
+      </div>
     </div>
 
+    <!-- 試算列 -->
     <div class="calc-bar" id="calc-bar">
       <span>📊 即時試算：原始 <b id="sys-raw">0</b> 點
       <span id="sys-minus-wrap" style="display:none;">（扣減 <b id="sys-minus-pts"></b> 點）</span>
@@ -297,6 +318,7 @@ body {
   </div>
 </div>
 
+<!-- ===== A4 橫式表格 ===== -->
 <div class="a4-wrap">
 <div class="a4-page">
 
@@ -309,6 +331,7 @@ body {
   </div>
 
   <table>
+    <!-- 不符補助列 -->
     <tr>
       <td colspan="8" style="font-size:9.5pt;line-height:1.4;padding:3px 6px;">
         <strong id="out-reject-title">□ 不符補助：</strong>
@@ -318,12 +341,14 @@ body {
         <span id="out-re-4"> □ 4. 案主已領有縣、鄉急難救助或急難紓困(馬上關懷)，已足以負擔醫療或喪葬急難事由。</span>
       </td>
     </tr>
+    <!-- 符合補助列 -->
     <tr>
       <td colspan="8" class="bg" id="out-accept-title" style="padding:3px 6px;font-size:10pt;">
         <span id="out-accept-text">□ 符合補助（審核評估計點表如下）：</span>
       </td>
     </tr>
 
+    <!-- 雙層表頭 -->
     <tr class="bg tc" style="font-size:9.5pt;">
       <th rowspan="2" style="width:13%;">社會救助法21條<br>急難救助之<br>急難原因</th>
       <th colspan="2" style="width:17%;">是否為主要負擔家計者</th>
@@ -339,6 +364,7 @@ body {
       <th>2倍以上(□0.5點)<br>/危機介入(□2點)</th>
     </tr>
 
+    <!-- 列 A：死亡 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-1">□戶內人口死亡<br>無力殮葬</td>
       <td class="tc v-cell" id="c-main-1"></td>
@@ -353,6 +379,7 @@ body {
       </td>
     </tr>
 
+    <!-- 列 B：意外傷害 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-2">□戶內人口遭受<br>意外傷害致<br>生活陷於困境</td>
       <td class="tc v-cell" id="c-main-2"></td>
@@ -367,6 +394,7 @@ body {
       </td>
     </tr>
 
+    <!-- 列 C：無法工作 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-3">□主要生計者罹病、<br>失業、服刑等<br>無法工作陷困</td>
       <td class="tc v-cell" id="c-main-3"></td>
@@ -382,6 +410,7 @@ body {
       </td>
     </tr>
 
+    <!-- 核定結果 -->
     <tr class="result-row">
       <td class="tc bg" style="vertical-align:middle;"><strong>核定結果</strong></td>
       <td colspan="7">
@@ -391,13 +420,16 @@ body {
           ＝ 核定補助金額 <span class="highlight" id="out-money">0</span> 元
         </div>
         <div class="result-note">（每案最高上限 5 點。本案係依115年度經費編列及個案實際需求核給）</div>
+        
+        <!-- 🌟 重複資源顯示區域 -->
         <div class="result-minus" id="out-minus-note" style="display:none;">
-          ※ 本案因申請人同一事由已領有其他社福／民間資源或保險給付，依說明四由本所酌予扣減 <span id="out-minus-pts">0</span> 點。
+          ※ 本案因申請人同一事由已領有其他社福／民間資源（<span id="out-minus-detail-text" style="text-decoration: underline; color: #b01c2e;">無備註</span>），依填表說明四由本所酌予扣減 <span id="out-minus-pts">0</span> 點。
         </div>
       </td>
     </tr>
   </table>
 
+  <!-- 填表說明 -->
   <div class="footnote">
     <strong>填表說明：</strong>
     一、同一事由年度內發給一次為原則。二、急難原因多項競合時，僅就第2次以後之原因計點（不含增點）。
@@ -407,6 +439,7 @@ body {
     七、家戶之動產、所得及不動產之計算與審核，均依衛生福利部「全國社會福利資源整合系統」查核資料列計。
   </div>
 
+  <!-- 簽名欄 -->
   <table class="sign-table">
     <tr><td>承 辦 人</td><td>課 長</td><td>秘 書</td><td>鄉 長</td></tr>
     <tr>
@@ -456,7 +489,7 @@ function updateForm() {
   const isRejected = rej.some(Boolean);
   const reTexts = [
     '1. 家戶內存款本金分配全家人口，超過當年度低收入戶存款本金2.5倍。',
-    '2. 喪葬或醫療無力負擔已獲有農勞保死亡給付、商業保險給付、理賠或低收入戶喪葬、醫療補助。',
+    '2. 喪葬或醫療無力負擔已獲有農勞保死亡給付、商業保險給付、理賠 or 低收入戶喪葬、醫療補助。',
     '3. 家庭總收入超過2.0倍以上，且無急難事由。',
     '4. 案主已領有縣、鄉急難救助或急難紓困(馬上關懷)，已足以負擔醫療 or 喪葬急難事由。'
   ];
@@ -531,8 +564,10 @@ function updateForm() {
   if (isWrk4) raw += Math.min(parseInt(document.getElementById('dep-wrk4').value)||0, 2);
   if (isWrk5) raw+=2;
 
-  // 扣減
+  // 扣減與重複資源備註
   const minusPts = parseFloat((document.querySelector('input[name="扣減"]:checked')||{}).value||0);
+  const minusDetail = document.getElementById('in-minus-detail').value.trim();
+  
   currentPoints = Math.min(5, Math.max(0, raw-minusPts));
   currentMoney  = currentPoints * 2000;
 
@@ -550,19 +585,21 @@ function updateForm() {
   // A4 結果
   document.getElementById('out-points').textContent = currentPoints;
   document.getElementById('out-money').textContent  = currentMoney.toLocaleString();
+  
   if (minusPts>0) {
     document.getElementById('out-minus-note').style.display='block';
     document.getElementById('out-minus-pts').textContent=minusPts;
-  } else { document.getElementById('out-minus-note').style.display='none'; }
+    document.getElementById('out-minus-detail-text').textContent = minusDetail || '未填寫具體項目';
+    if(minusDetail) { currentCauses.push('已領取:'+minusDetail); }
+  } else { 
+    document.getElementById('out-minus-note').style.display='none'; 
+  }
 
   // ── A4 報表打勾連動機制 ──
-  
-  // 1. 左邊急難原因大項勾選與否連動
   document.getElementById('lbl-cause-1').textContent = (baseDeath || isDeath ? '☑' : '□') + '戶內人口死亡\n無力殮葬';
   document.getElementById('lbl-cause-2').textContent = (baseInjury || isInj1 || isInj2 || isInj3 ? '☑' : '□') + '戶內人口遭受\n意外傷害致\n生活陷於困境';
   document.getElementById('lbl-cause-3').textContent = (baseWork || isWrk1 || isWrk2 || isWrk3 || isWrk4 || isWrk5 ? '☑' : '□') + '主要生計者罹病、\n失業、服刑等\n無法工作陷困';
 
-  // 2. 右邊增點細項勾選與否連動
   document.getElementById('lbl-add-1-2').textContent = (isDeath ? '☑' : '□') + '2.主要負擔家計身故，戶內共同生活2人以上，依賴人口（不含本人及政府生活津貼者）每增1人加1點，最高4點。';
   document.getElementById('lbl-add-2-1').textContent = (isInj1 || isInj2 ? '☑' : '□') + '1.未獲商業保險給付或賠償者。自付額原則以1-5萬元以下（1萬以下無力負擔致陷困者酌給）。自付額2-3萬（含）加1點，3萬以上5萬（含）加最多3點。';
   document.getElementById('lbl-add-2-2').textContent = (isInj3 ? '☑' : '□') + '2.主要家計者住院15天以上或需長照，戶內共同生活2人以上，依賴人口每增1人加1點，最高4點。';
@@ -570,7 +607,6 @@ function updateForm() {
   document.getElementById('lbl-add-3-2').textContent = (isWrk4 ? '☑' : '□') + '2.主要生計責任者，共同生活2人以上，依賴人口（不含本人及政府津貼者）每增1人加1點，最高2點。';
   document.getElementById('lbl-add-3-3').textContent = (isWrk5 ? '☑' : '□') + '3.具工作能力未就業且未領取給付者（如因年邁60~65歲或身心障礙無家屬支援者加計2點）。';
 
-  // 3. V 格交叉對應連動
   clearCells();
   const colFam = famVal==='main'?'main': famVal==='non'?'non': null;
   const colInc = {'1':'i1','1.5':'i2','2':'i3','2p':'i4','crisis':'i4'}[incVal]||null;
