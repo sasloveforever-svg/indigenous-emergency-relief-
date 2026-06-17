@@ -173,7 +173,10 @@ body {
 .result-main  { font-size:11pt; font-weight:bold; line-height:1.5; }
 .result-main .highlight { font-size:13pt; }
 .result-note  { font-size:8.5pt; color:#334; margin-top:1px; }
+
+/* 資源重複與備註提示列 */
 .result-minus { font-size:9.5pt; color:#5a2000; margin-top:3px; font-weight:bold; background:#fffcf0; padding:2px 6px; border-radius:3px; border: 1px dashed #c97a00; }
+.result-minus.rejected-style { color:#6b1111; background:#fff5f5; border-color:#e53e3e; }
 
 /* 填表說明 */
 .footnote { font-size:7.5pt; line-height:1.35; color:#111; margin-bottom:4px;
@@ -209,6 +212,7 @@ body {
 </head>
 <body>
 
+<!-- ===== 操作面板 ===== -->
 <div class="control-panel">
   <div class="panel-header">
     <span style="font-size:22px;">📋</span>
@@ -217,6 +221,7 @@ body {
   </div>
   <div class="panel-body">
 
+    <!-- 基本資料 -->
     <div class="basic-info-row">
       <div class="field-group"><label>案主姓名</label><input type="text" id="in-name" oninput="updateForm()" placeholder="請輸入姓名"></div>
       <div class="field-group"><label>身分證字號</label><input type="text" id="in-id" oninput="updateForm()" placeholder="A123456789"></div>
@@ -227,6 +232,7 @@ body {
       </div>
     </div>
 
+    <!-- 排他審查 -->
     <div class="sec-title danger"><span class="sec-num">✕</span>資格排他審查 — 有勾選任一項，系統將強制判定「不符補助」並核定 0 元</div>
     <div class="opt-group">
       <label class="danger-opt"><input type="checkbox" id="in-reject-1" onchange="updateForm()"> 1. 家戶內存款本金分配全家人口，超過當年度低收入戶存款本金 2.5 倍。</label>
@@ -235,6 +241,7 @@ body {
       <label class="danger-opt"><input type="checkbox" id="in-reject-4" onchange="updateForm()"> 4. 案主已領有縣、鄉急難救助或急難紓困（馬上關懷），已足以負擔醫療或喪葬急難事由。</label>
     </div>
 
+    <!-- 1 主要家計 -->
     <div class="sec-title primary"><span class="sec-num">1</span>主要家計責任者評估（單選）</div>
     <div class="opt-group">
       <label><input type="radio" name="家計" value="main" onchange="updateForm()"> 主要負擔家計者 <strong style="color:#1a56db;">＋ 3 點</strong></label>
@@ -242,6 +249,7 @@ body {
       <label><input type="radio" name="家計" value="none" onchange="updateForm()" checked> 無此項判定</label>
     </div>
 
+    <!-- 2 所得 -->
     <div class="sec-title primary"><span class="sec-num">2</span>所得收入與危機狀態評估（單選）</div>
     <div class="opt-group">
       <label><input type="radio" name="所得" value="1"      onchange="updateForm()"> 1 倍以下（非列冊低收入戶）<strong style="color:#1a56db;">＋ 2 點</strong></label>
@@ -252,6 +260,7 @@ body {
       <label><input type="radio" name="所得" value="none"   onchange="updateForm()" checked> 無此項判定</label>
     </div>
 
+    <!-- 3 急難原因 -->
     <div class="sec-title primary"><span class="sec-num">3</span>急難原因選項與加點（複選）</div>
 
     <span class="sub-label">A．戶內人口死亡無力殮葬</span>
@@ -287,6 +296,7 @@ body {
       <label><input type="checkbox" id="cause-wrk5" onchange="updateForm()"> 失業者年邁（60～65歲）或身障、未領津貼且無家屬支援 <strong style="color:#1a56db;">＋ 2 點</strong></label>
     </div>
 
+    <!-- 4 扣減 -->
     <div class="sec-title warning"><span class="sec-num">4</span>資源重複扣減評估（單選 ＆ 補助內容備註）</div>
     <div class="opt-group">
       <label><input type="radio" name="扣減" value="0" checked onchange="updateForm()"> 不予扣減（0 點）</label>
@@ -300,6 +310,7 @@ body {
       </div>
     </div>
 
+    <!-- 試算列 -->
     <div class="calc-bar" id="calc-bar">
       <span>📊 即時試算：原始 <b id="sys-raw">0</b> 點
       <span id="sys-minus-wrap" style="display:none;">（扣減 <b id="sys-minus-pts"></b> 點）</span>
@@ -320,6 +331,7 @@ body {
   </div>
 </div>
 
+<!-- ===== A4 橫式表格 ===== -->
 <div class="a4-wrap">
 <div class="a4-page">
 
@@ -332,6 +344,7 @@ body {
   </div>
 
   <table>
+    <!-- 不符補助列 -->
     <tr>
       <td colspan="8" style="font-size:9.5pt;line-height:1.4;padding:3px 6px;">
         <strong id="out-reject-title">□ 不符補助：</strong>
@@ -341,12 +354,14 @@ body {
         <span id="out-re-4"> □ 4. 案主已領有縣、鄉急難救助或急難紓困(馬上關懷)，已足以負擔醫療或喪葬急難事由。</span>
       </td>
     </tr>
+    <!-- 符合補助列 -->
     <tr>
       <td colspan="8" class="bg" id="out-accept-title" style="padding:3px 6px;font-size:10pt;">
         <span id="out-accept-text">□ 符合補助（審核評估計點表如下）：</span>
       </td>
     </tr>
 
+    <!-- 雙層表頭 -->
     <tr class="bg tc" style="font-size:9.5pt;">
       <th rowspan="2" style="width:13%;">社會救助法21條<br>急難救助之<br>急難原因</th>
       <th colspan="2" style="width:17%;">是否為主要負擔家計者</th>
@@ -362,6 +377,7 @@ body {
       <th>2倍以上(□0.5點)<br>/危機介入(□2點)</th>
     </tr>
 
+    <!-- 列 A：死亡 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-1">□戶內人口死亡<br>無力殮葬</td>
       <td class="tc v-cell" id="c-main-1"></td>
@@ -376,6 +392,7 @@ body {
       </td>
     </tr>
 
+    <!-- 列 B：意外傷害 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-2">□戶內人口遭受<br>意外傷害致<br>生活陷於困境</td>
       <td class="tc v-cell" id="c-main-2"></td>
@@ -390,6 +407,7 @@ body {
       </td>
     </tr>
 
+    <!-- 列 C：無法工作 -->
     <tr>
       <td class="cause-cell" id="lbl-cause-3">□主要生計者罹病、<br>失業、服刑等<br>無法工作陷困</td>
       <td class="tc v-cell" id="c-main-3"></td>
@@ -405,6 +423,7 @@ body {
       </td>
     </tr>
 
+    <!-- 核定結果 -->
     <tr class="result-row">
       <td class="tc bg" style="vertical-align:middle;"><strong>核定結果</strong></td>
       <td colspan="7">
@@ -415,13 +434,15 @@ body {
         </div>
         <div class="result-note">（每案最高上限 5 點。本案係依115年度經費編列及個案實際需求核給）</div>
         
+        <!-- 🌟 重點修正區：移除原有符合補助才顯示的機制，改由 JavaScript 精準控制文字 -->
         <div class="result-minus" id="out-minus-note" style="display:none;">
-          ※ 本案因申請人同一事由已領有其他社福／民間資源（<span id="out-minus-detail-text" style="text-decoration: underline; color: #b01c2e;">無備註</span>），依填表說明四由本所酌予扣減 <span id="out-minus-pts">0</span> 點。
+          <span id="out-minus-text-content">※ 本案因申請人同一事由已領有其他社福／民間資源（<span id="out-minus-detail-text" style="text-decoration: underline; color: #b01c2e;">無備註</span>），依填表說明四由本所酌予扣減 <span id="out-minus-pts">0</span> 點。</span>
         </div>
       </td>
     </tr>
   </table>
 
+  <!-- 填表說明 -->
   <div class="footnote">
     <strong>填表說明：</strong>
     一、同一事由年度內發給一次為原則。二、急難原因多項競合時，僅就第2次以後之原因計點（不含增點）。
@@ -431,8 +452,9 @@ body {
     七、家戶之動產、所得及不動產之計算與審核，均依衛生福利部「全國社會福利資源整合系統」查核資料列計。
   </div>
 
+  <!-- 簽名欄 -->
   <table class="sign-table">
-    <tr><td>承 辦 人</td><td>課 長</td><td>秘 書</td><td>鄉 長</td></tr>
+    <tr><td>承 辦 人</td><td>課 長</td><td>秘 責</td><td>鄉 長</td></tr>
     <tr>
       <td class="sign-line" style="text-align:left;">
         本案核定後賸餘：<span id="out-budget-val" style="border-bottom:1px solid #000; padding:0 12px; font-weight:bold;">186,000</span> 元
@@ -462,17 +484,15 @@ function toggleDep(ckId, rowId) {
 
 let currentPoints = 0, currentMoney = 0, currentCauses = [], finalRemainingBudget = 186000;
 
-// 🌟 新增：頁面一打開，自動去瀏覽器記憶庫拿上次最新扣完的數字
 function initBudget() {
   const savedBudget = localStorage.getItem('current_running_budget');
   if (savedBudget !== null) {
     document.getElementById('in-budget').value = savedBudget;
   } else {
-    document.getElementById('in-budget').value = "186000"; // 第一次完全沒紀錄時，用 186000 起算
+    document.getElementById('in-budget').value = "186000";
   }
 }
 
-// 🌟 新增：一鍵強制重設功能
 function resetBudgetToDefault() {
   if (confirm('確定要將系統的賸餘款重設為 186,000 元嗎？')) {
     localStorage.setItem('current_running_budget', "186000");
@@ -495,6 +515,10 @@ function updateForm() {
   const origBudgetRaw = document.getElementById('in-budget').value.replace(/,/g, '').trim();
   const originalBudget = origBudgetRaw ? parseFloat(origBudgetRaw) : 0;
 
+  // 自訂重複領取资源欄位值
+  const minusDetail = document.getElementById('in-minus-detail').value.trim();
+  const minusPts = parseFloat((document.querySelector('input[name="扣減"]:checked')||{}).value||0);
+
   // 不符補助排他
   const rej = [1,2,3,4].map(i => document.getElementById('in-reject-'+i).checked);
   const isRejected = rej.some(Boolean);
@@ -508,13 +532,23 @@ function updateForm() {
     document.getElementById('out-re-'+(i+1)).textContent = (c?'☑':'□')+' '+reTexts[i];
   });
 
+  // 🌟【新修改邏輯】如果被排他判定為不符資格
   if (isRejected) {
     document.getElementById('out-reject-title').textContent = '☑ 不符補助：';
     document.getElementById('out-accept-title').textContent = '□ 符合補助（審核評估計點表如下）：';
     document.getElementById('out-conclusion').textContent   = '☑ 不符補助';
     document.getElementById('out-points').textContent = '0';
     document.getElementById('out-money').textContent  = '0';
-    document.getElementById('out-minus-note').style.display = 'none';
+
+    // 🌟 不符資格時的自訂重複資源顯示機制
+    const minusNoteBox = document.getElementById('out-minus-note');
+    if (minusDetail !== '') {
+      minusNoteBox.style.display = 'block';
+      minusNoteBox.className = 'result-minus rejected-style'; // 改為淡紅色外框以符合不符資格之視覺
+      document.getElementById('out-minus-text-content').innerHTML = `※ 審查備註：申請人目前同一急難事由，已另領有其他社福／民間資源（<span style="text-decoration: underline; color: #b01c2e;">${minusDetail}</span>），依排他條款及填表說明四，判定不符本項補助。`;
+    } else {
+      minusNoteBox.style.display = 'none';
+    }
 
     finalRemainingBudget = originalBudget;
     document.getElementById('sys-rem-budget').textContent = finalRemainingBudget.toLocaleString();
@@ -522,12 +556,15 @@ function updateForm() {
 
     const bar = document.getElementById('calc-bar');
     bar.className = 'calc-bar rejected';
-    bar.innerHTML = `<span style="color:#b01c2e;font-weight:700;">🛑 本案判定【不符補助】，金額歸 0 元。 📉 本案核定後賸餘：${finalRemainingBudget.toLocaleString()} 元</span>`;
+    bar.innerHTML = `<span style="color:#b01c2e;font-weight:700;">🛑 本案判定【不符補助】，金額歸 0 元。 📉 本案核定後源：${finalRemainingBudget.toLocaleString()} 元</span>`;
     clearCells();
-    currentPoints = 0; currentMoney = 0; currentCauses = ['不符補助（排他原因）'];
+    currentPoints = 0; currentMoney = 0; 
+    currentCauses = ['不符補助（排他原因）'];
+    if (minusDetail) currentCauses.push('已領取:' + minusDetail);
     return;
   }
 
+  // ── 以下為符合補助時之正常邏輯 ──
   document.getElementById('out-reject-title').textContent = '□ 不符補助：';
   document.getElementById('out-accept-title').textContent = '☑ 符合補助（審核評估計點表如下）：';
   document.getElementById('out-conclusion').textContent   = '☑ 符合補助';
@@ -578,10 +615,6 @@ function updateForm() {
   if (isWrk3) raw+=3; else if (isWrk2) raw+=2; else if (isWrk1) raw+=1;
   if (isWrk4) raw += Math.min(parseInt(document.getElementById('dep-wrk4').value)||0, 2);
   if (isWrk5) raw+=2;
-
-  // 扣減與重複資源備註
-  const minusPts = parseFloat((document.querySelector('input[name="扣減"]:checked')||{}).value||0);
-  const minusDetail = document.getElementById('in-minus-detail').value.trim();
   
   currentPoints = Math.min(5, Math.max(0, raw-minusPts));
   currentMoney  = currentPoints * 2000;
@@ -609,13 +642,16 @@ function updateForm() {
   document.getElementById('out-money').textContent  = currentMoney.toLocaleString();
   document.getElementById('out-budget-val').textContent = finalRemainingBudget.toLocaleString();
   
-  if (minusPts>0) {
-    document.getElementById('out-minus-note').style.display='block';
-    document.getElementById('out-minus-pts').textContent=minusPts;
-    document.getElementById('out-minus-detail-text').textContent = minusDetail || '未填寫具體項目';
+  // 🌟 符合補助時：只要有填備註名稱（不論有沒有扣點），就強制在 A4 產出顯示
+  const minusNoteBox = document.getElementById('out-minus-note');
+  if (minusDetail !== '' || minusPts > 0) {
+    minusNoteBox.style.display = 'block';
+    minusNoteBox.className = 'result-minus'; // 回復成淡黃色正常外框
+    const showDetailText = minusDetail || '未填寫具體項目';
+    document.getElementById('out-minus-text-content').innerHTML = `※ 本案因申請人同一事由已領有其他社福／民間資源（<span style="text-decoration: underline; color: #b01c2e;">${showDetailText}</span>），依填表說明四由本所酌予扣減 <span id="out-minus-pts">${minusPts}</span> 點。`;
     if(minusDetail) { currentCauses.push('已領取:'+minusDetail); }
   } else { 
-    document.getElementById('out-minus-note').style.display='none'; 
+    minusNoteBox.style.display = 'none'; 
   }
 
   // ── A4 報表打勾連動機制 ──
@@ -664,20 +700,17 @@ async function saveToGoogleSheets() {
     await fetch(GOOGLE_SCRIPT_URL, {
       method:'POST', mode:'no-cors', cache:'no-cache',
       headers:{'Content-Type':'application/json'},
-      // 🌟 重點：回傳給 Google Sheets 的預算欄位直接帶入當下算完的【核定後賸餘預算】
       body:JSON.stringify({ name, idNum, cause:currentCauses.join(', '), points:currentPoints, money:currentMoney, budget:finalRemainingBudget })
     });
 
-    // 🌟 智慧記憶核心：儲存成功後，立刻把「核定後賸餘」寫進瀏覽器的腦袋裡
     localStorage.setItem('current_running_budget', finalRemainingBudget);
-    // 直接把控制面板的「核定前賸餘預算」同步改掉，等一下點新案件可以直接用
     document.getElementById('in-budget').value = finalRemainingBudget;
 
-    alert(`🎉 儲存成功！\n案主：${name}\n核定金額：${currentMoney.toLocaleString()} 元\n\n💡 系統已自動記憶最新賸餘預算：${finalRemainingBudget.toLocaleString()} 元！\n資料已同步同步至 Google 試算表。`);
+    alert(`🎉 儲存成功！\n案主：${name}\n核定金額：${currentMoney.toLocaleString()} 元\n\n💡 系統已自動記憶最新賸餘預算：${finalRemainingBudget.toLocaleString()} 元！\n資料已同步至 Google 試算表。`);
     
-    // 儲存完後自動清空姓名和身分證，方便您直接辦下一件，且預算已自動變新數字
     document.getElementById('in-name').value = '';
     document.getElementById('in-id').value = '';
+    document.getElementById('in-minus-detail').value = ''; // 儲存完自動清空備註
     updateForm();
 
   } catch(e) {
@@ -686,7 +719,6 @@ async function saveToGoogleSheets() {
   btn.disabled=false; btn.textContent='💾 儲存個案並存檔';
 }
 
-// 🌟 初始化：載入時先拿預算記憶，再更新畫面
 window.addEventListener('DOMContentLoaded', () => {
   initBudget();
   updateForm();
